@@ -3,6 +3,46 @@ from openai import OpenAI
 import json
 import os
 import re
+from threading import Thread
+from flask import Flask
+import requests
+import time
+
+# Configuración de Flask para keep-alive
+app = Flask(__name__)
+
+@app.route("/")
+def healthcheck():
+    return {"status": "Bot activo", "message": "Discord bot está funcionando"}, 200
+
+@app.route("/health")
+def health():
+    return "OK", 200
+
+def run_web_server():
+    """Ejecuta el servidor Flask en segundo plano"""
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+def keep_alive():
+    """Función para mantener viva la aplicación haciendo requests periódicos"""
+    def ping_self():
+        while True:
+            try:
+                time.sleep(600)  # Esperar 10 minutos
+                # Obtener la URL de diferentes formas posibles
+                url = (os.environ.get("RENDER_EXTERNAL_URL") or 
+                       os.environ.get("RENDER_SERVICE_URL") or 
+                       f"http://localhost:{os.environ.get('PORT', 8080)}")
+                
+                # Hacer request a sí mismo para mantener activo
+                response = requests.get(f"{url}/health", timeout=10)
+                print(f"✅ Keep-alive ping enviado - Status: {response.status_code}")
+            except Exception as e:
+                print(f"⚠️ Error en keep-alive ping: {e}")
+                # Continuar intentando aunque falle
+    
+    Thread(target=ping_self, daemon=True).start()
 
 # Configuración de intents
 intents = discord.Intents.default()
@@ -146,6 +186,7 @@ async def enviar_mensaje_largo(channel, mensaje):
 @client.event
 async def on_ready():
     print(f'✅ Bot conectado como {client.user}')
+    print(f'🌐 Servidor web activo en puerto {os.environ.get("PORT", 8080)}')
     cargar_preguntas()
 
 
@@ -379,8 +420,20 @@ SÉ ESTRICTO. No des puntos por respuestas vagas, incorrectas o absurdas."""
         await enviar_mensaje_largo(message.channel, ayuda)
 
 
-# Ejecutar el bot
-if __name__ == "__main__":
+# Función principal para iniciar todo
+def main():
+    """Función principal que inicia el servidor web y el bot de Discord"""
+    # Iniciar servidor web en segundo plano
+    web_thread = Thread(target=run_web_server, daemon=True)
+    web_thread.start()
+    
+    # Iniciar keep-alive
+    keep_alive()
+    
+    print("🚀 Iniciando bot de Discord...")
+    print("🌐 Servidor web iniciado para keep-alive")
+    
+    # Ejecutar el bot de Discord
     if not TOKEN_DISCORD:
         print("❌ Error: DISCORD_BOT_TOKEN no está configurado")
     elif not os.getenv("GROQ_API_KEY"):
@@ -392,3 +445,8 @@ if __name__ == "__main__":
             print("❌ Error: Token de Discord inválido")
         except Exception as e:
             print(f"❌ Error al iniciar el bot: {e}")
+
+
+# Ejecutar el bot
+if __name__ == "__main__":
+    main()
