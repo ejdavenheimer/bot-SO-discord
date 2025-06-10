@@ -14,3 +14,10 @@ Botcito para Discord para estudiar Sistemas Operativos.
 # Preguntas del primer parcial
 [Recopilación de preguntas de parciales](https://docs.google.com/spreadsheets/d/1iXtr1pbRFgiiaHuv7IlOn8yG-cyS_o_KwOm2Jy0GBr0/edit?usp=sharing)  
 Las respuestas que salen sombreadas en violeta tienen la respuesta en la hoja 2 (Respuestas sombreadas en violeta).
+
+# Querés levantar tu propio servidor para el bot?
+1. Podés acceder a [Replit](https://replit.com/) para levantarlo.  
+2. Le agregas las secrets de tu bot y de groq (IA que utiliza para chequear las respuestas).  
+2.i DISCORD_BOT_TOKEN : (sugiero hacer un bot sino post cursada si alguno lo necesita le paso mi token).  
+2.ii GROQ_API_KEY : sacar una dese la página.  
+3. Levantar el servidor y funciona todo de lujo.

@@ -1,0 +1,532 @@
+{
+  "preguntas": [
+    {
+      "pregunta": "Explique qué ocurriría si intentara ejecutar una instrucción privilegiada (por ej, “cli”) en un proceso de Usuario. ¿Se generaría alguna interrupción (y de qué tipo)?",
+      "respuesta": "La CPU lanzaría una interrupción (sincrónica) al intentar ejecutar la instrucción, al\natenderse esta interrupción se realizaría un cambio de modo y contexto para que el SO\natienda la misma y usualmente finaliza al proceso que produjo la interrupción."
+    },
+    {
+      "pregunta": "Explique qué criterios analizaría de un sistema para decidir si utilizar múltiples hilos dentro de un mismo proceso, o, en su lugar, múltiples procesos cooperativos.",
+      "respuesta": "Aunque hay muchos criterios para analizar, podemos dar 2 ejemplos: Si la prioridad del sistema fuera la seguridad y se deseara que una parte no pueda acceder a los datos de otra, utilizaría múltiples procesos cooperativos, ya que los hilos por defecto comparten memoria con sus hilos pares. Si en cambio fuera una mayor prioridad la eficiencia en el uso de la memoria, utilizaría múltiples hilos dentro de un mismo proceso para que puedan reutilizar memoria lo más posible."
+    },
+    {
+      "pregunta": "Si se pidiera implementar un algoritmo de planificación de colas multinivel con 3 colas de distintas prioridades, donde cada una de ellas se planifica por RR: a) ¿Qué otra información acerca del algoritmo necesitaría para poder implementarlo? b) ¿Podría ocurrir starvation? En caso afirmativo, ejemplifique cómo podría ocurrir, en caso negativo explique por qué no podría ocurrir.",
+      "respuesta": "a. Suponiendo que ya se conoce la prioridad de cada cola y su quantum, se necesitaría saber además: - A qué cola/s ingresan los procesos nuevos? - La prioridad entre colas es con desalojo? - Si son colas retroalimentadas, bajo qué eventos se moverían procesos de una cola a otra? b. Depende del criterio en que los procesos se muevan de una cola a otra (cambian de prioridad), pero normalmente este algoritmo provocaría starvation en la cola menos prioritaria si siempre hay para ejecutar procesos en las más prioritarias."
+    },
+    {
+      "pregunta": "Si se utilizan semáforos implementados con espera activa, responda y justifique V o F: a) Podrían tomar valores negativos indicando cuántos procesos esperan por el semáforo. b) No podría ocurrir deadlock debido a estos semáforos",
+      "respuesta": "a. Al implementarse con espera activa, los semáforos no toman valores negativos y seguirá ejecutando aquél que sea elegido por el planificador de corto plazo. b. En todo caso ocurriría un livelock, ya que los procesos esperando por estos semáforos no estarían bloqueados sino en ejecución."
+    },
+    {
+      "pregunta": "Proponga un mecanismo de prevención para que no se cumpla la condición “retención y espera” en un conjunto de procesos.",
+      "respuesta": "Un mecanismo sencillo pero que puede llegar a ser muy poco eficiente es que estos procesos pidan preventivamente todos los recursos que utilizarán a lo largo de su ejecución."
+    },
+    {
+      "pregunta": "Explique cuándo y por qué es necesario utilizar system calls ¿Cómo se relacionan con los cambios de modo?",
+      "respuesta": "La utilización de syscalls es necesaria cuando un proceso requiere funciones o recursos que administra el sistema operativo como memoria, semáforos o comunicación entre procesos. Si los procesos pudieran hacer este tipo de operaciones por sí mismos sería un problema grave de seguridad. Al ejecutar una syscall se realiza un cambio de modo ya que su rutina asociada suele contener instrucciones privilegiadas y acceso al espacio de memoria del Kernel."
+    },
+    {
+      "pregunta": "Muestre un ejemplo simple en pseudocódigo indicando en qué parte de la imagen del proceso se encontraría cada elemento del mismo.",
+      "respuesta": "- - - - Código - - - - Int contadorGlobal = 0 Int main(int argc, void* argv) { void* variableLocal = malloc(64) return; }                                                            -> contadorGlobal en Datos\n-> variableLocal en Stack, la memoria\ndinámica pedida en Heap"
+    },
+    {
+      "pregunta": "En un instante ocurre una interrupción por fin de quantum y otra por fin de E/S. Explique qué ocurriría con el estado de cada proceso y cómo influiría en la planificación de corto plazo, justificando qué proceso será elegido para ejecutar y por qué. Considere dicha situación por un lado para RR y por otro para VRR.",
+      "respuesta": "Por la interrupción de fin de Q el proceso en EXEC pasaría a READY, por la interrupción de fin de E/S un proceso BLOQ pasaría a READY. En RR sería elegido el proceso que llegue primero a READY, si las interrupciones ocurren en un lapso de tiempo muy corto, dependerá de cuál se atienda primero. En VRR ejecutaría primero el proceso que estaba bloqueado ya que iría a la cola prioritaria por sobrarle Q a diferencia de quien fue desalojado por fin de Q"
+    },
+    {
+      "pregunta": "Indique V o F justificando en ambos casos: a. Según las condiciones de Bernstein, debe cumplirse que dos procesos/hilos accedan concurrentemente a algún recurso en común y al menos uno de ellos lo modifique para que sea necesario sincronizarlos. b. El problema de inversión de prioridades puede resolverse sincronizando con soluciones a nivel hardware en lugar de semáforos.",
+      "respuesta": "a. Verdadero, Son las condiciones para que ocurra una condición de carrera y se deba sincronizar, como contra ejemplo, si el acceso no fuera concurrente o ninguno modifique el recurso, no sería necesaria la mutua exclusión. b. Falso, La implementación de semáforos debe utilizar herencia de prioridades para resolver el conflicto."
+    },
+    {
+      "pregunta": "Explique las diferencias entre las estrategias de prevención y evasión de deadlocks. Proponga una situación en la que sea preferible usar prevención y fundamente por qué es más adecuada que evasión para dicho caso.",
+      "respuesta": "La principal diferencia es en qué momento se emplea cada estrategia. La prevención busca que la petición de recursos se dé de forma tal que no se cumpla alguna de las condiciones necesarias para que ocurra deadlock. La evasión en cambio es algo más flexible con las peticiones pero simula la asignación para verificar que la misma no pueda ocasionar deadlocks en el futuro. Esto requiere un overhead mucho más grande por lo que la prevención es más adecuada en sistemas con menos capacidad ociosa o con una utilización de recursos más predecible."
+    },
+    {
+      "pregunta": "Explique la diferencia entre una syscall y su respectivo wrapper de la biblioteca del sistema. Ejemplifique y mencione al menos una razón para cada caso en el cual convenga su uso",
+      "respuesta": "Las syscalls son la interfaz que nos brinda el sistema operativo para acceder a las funciones que él mismo provee de forma segura. Los wrappers de la biblioteca del sistema buscan abstraer el comportamiento de las primeras “envolviendo” la llamada a las mismas con lógica extra que permite simplificar su llamada por parte de los desarrolladores y brindan una mayor portabilidad. Cuándo usar wrappers: cuando busco simplicidad y portabilidad. Cuándo usar syscalls de forma directa: cuando busco un completo control sobre la configurabilidad del pedido de recursos/servicios al sistema operativo. Ejemplo de syscall y wrapper de la biblioteca estándar: open y fopen, read y fread, write y frite, etc."
+    },
+    {
+      "pregunta": "Un servidor con 16 procesadores atiende peticiones de 4 tipos distintos y desea poder planificar la atención de cada tipo bajo un algoritmo personalizado. Así mismo, se desea que algún error en las peticiones de algún tipo no afecten al funcionamiento del resto. Proponga una combinación de Procesos e hilos para cumplir con los requerimientos.",
+      "respuesta": "Por cada tipo de petición se levanta al menos un proceso (es decir, 4 procesos como mínimo) ya que “se desea que algún error en las peticiones de algún tipo no afecten al funcionamiento del resto”. De esta manera, cada proceso hace uso de su espacio de memoria de forma totalmente independiente imposibilitando que un error dentro de un grupo de peticiones afecte a otro grupo. A su vez, por cada petición nueva que llegue al servidor se creará un ULT ya que “desea poder planificar la atención de cada tipo bajo un algoritmo personalizado”. De esta manera, por cada tipo de petición tendremos un proceso con una biblioteca de ULTs que se ajuste a las necesidades de planificación del tipo de petición en cuestión."
+    },
+    {
+      "pregunta": "Para los próximos puntos, responda Verdadero o Falso, justificando en ambos casos: 4. a. Al garantizar mutua exclusión, siempre es más performante utilizar semáforos con bloqueo que instrucciones de hardware como testAndSet o swapAndExchange. b. Si dos hilos acceden concurrentemente a una variable global, no es necesario que ambos la modifiquen para que se genere una condición de carrera.",
+      "respuesta": "A. FALSO Si se dan las siguientes condiciones: ● La sección crítica es tan pequeña que el tiempo requerido para hacer los cambios de contexto inherentes al bloqueo-desbloqueo del proceso es mayor que el tiempo que el proceso necesita esperar para entrar a la sección crítica. ● Se posee más de un procesador y los procesos que quieren acceder a la sección crítica de forma concurrente están ejecutando de forma paralela. Entonces, es más performante utilizar una solución de mutua exclusión con espera activa, así como lo son testAndSet y swapAndExchange. En estos casos también sería mås performante utilizar semáforos con espera activa que con bloqueo, pero las soluciones de HW serían las más performantes de todas por no requerir el uso de syscalls (y los cambios de contexto inherentes a las mismas). B. VERDADERO Condiciones de Bernstein: Dos o más hilos deben estar accediendo de forma concurrente al mismo recurso y al menos uno de ellos debe estar modificándolo."
+    },
+    {
+      "pregunta": "Para los próximos puntos, responda Verdadero o Falso, justificando en ambos casos: a. En un sistema en que los procesos declaran sus peticiones máximas de recursos al\niniciar, se utiliza algún mecanismo de prevención de deadlocks.\nb. Al detectar un deadlock, siempre puede resolverse finalizando un solo proceso.",
+      "respuesta": "A. FALSO Matriz de peticiones máximas -> Evasión B. FALSO En caso de elegir como estrategia de recuperación de deadlocks la eliminación de un proceso entonces debe posteriormente volverse a correr el algoritmo de detección para verificar la efectiva recuperación y elegir otra víctima en caso de que el deadlock no se haya resuelto. (También es vålido que ejemplifiquen con un caso concreto donde solamente finalizando un proceso no es suficiente para resolver el deadlock)."
+    },
+    {
+      "pregunta": "Explique la relación entre las instrucciones privilegiadas/no-privilegiadas y los modos de ejecución.",
+      "respuesta": "El modo kernel puede ejecutar tanto las instrucciones privilegiadas como las no privilegiadas. El modo usuario solamente puede ejecutar instrucciones no privilegiadas."
+    },
+    {
+      "pregunta": "Mencione las ventajas y al menos una desventaja de utilizar Procesos en lugar de Hilos KLTs. En una aplicación que busque minimizar los cambios de modo, ¿qué tipos de hilos convendría usar?",
+      "respuesta": "Usar procesos ofrece un aislamiento que permite evitar la propagación de errores (intencionales o no) entre ellos, mientras que los hilos al encontrarse altamente acoplados (compartiendo varios recursos) pueden verse afectados. Además, al no compartir recursos entre ellos por default, los procesos proveen mayor seguridad. Una de las desventajas de utilizar procesos es que su creación es más lenta, ya que crear un KLT requiere de estructuras más livianas que crear procesos. Utilizar hilos de usuario permitiría realizar menos cambios de modo, ya que se gestionan en modo de usuario"
+    },
+    {
+      "pregunta": "Explique la diferencia entre los algoritmos de planificación con y sin desalojo. En un sistema en el que no queremos procesos monopolizando la CPU, ¿cuál sería conveniente utilizar?",
+      "respuesta": "La planificación sin desalojo implica que el proceso libera la cpu solamente cuando se bloquea o finaliza su ejecución. La planificación con desalojo agrega la posibilidad de expulsar intempestivamente al proceso de la cpu en la ocurrencia de interrupciones o syscalls, cuando otro proceso tiene más prioridad según indique el planificador. Sería necesario usar planificadores con desalojo para evitar monopolizar la cpu."
+    },
+    {
+      "pregunta": "Responda Verdadero o Falso, justificando en ambos casos: a) En un sistema donde los procesos compiten por los recursos es necesario protegerlos implementando alguna solución que nos brinde mutua exclusión. b) Las soluciones de software conocidas no son performantes debido a que incurren en mucha espera activa.",
+      "respuesta": "Verdadero o falso: a) Entendiendo por competencia al esquema bajo el cual el sistema operativo es el único quien tiene la responsabilidad de administrar los recursos, sería FALSO, por otra parte, si se entiende por competencia a la utilización de los recursos por parte de los procesos de forma concurrente, es VERDADERA sí y sólo sí al menos uno de los procesos/hilos involucrados fuese a modificar los recursos. b) Falso. Si bien es cierto que las soluciones de software incurren en espera activa ya que su implementación requiere de utilizar bucles al no poder usar bloqueo, su performance dependerá de varios factores. Una sección crítica con poca probabilidad de concurrencia, donde el código dentro de la misma se ejecuta rápidamente y teniendo en cuenta un sistema con varios núcleos, esta alternativa podría ser más efectiva que la utilización de soluciones con bloqueo"
+    },
+    {
+      "pregunta": "Si analiza un sistema para determinar si está ocurriendo un deadlock o un livelock, ¿Cuáles métricas del sistema operativo y computadora permitirían inferir la respuesta?",
+      "respuesta": "Considera mirar las siguientes métricas: a) Listar los procesos y ver su estado. Si los mismos no progresan y se encuentran en estado BLOQUEADO, sería un indicio de que podrían estar interbloqueados mientras que si todos los procesos se encuentran ejecutando sería un indicio de un posible livelock. b) Listar el consumo de la cpu de la computadora y de los procesos involucrados. En caso de que el mismo tuviera valores que indicaran un consumo frecuente, y si observáramos que su estado cambia con frecuencia (READY/RUNNING/BLOQUEADO) podríamos estar ante la presencia de un livelock."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos: a) La atención de una interrupción implica al menos un cambio de modo independientemente de qué se esté ejecutando. b) Una llamada al sistema (syscall) implica únicamente dos cambios de modo.",
+      "respuesta": "a) F, si la interrupción se produjo durante la atención de otra interrupción, solamente es requerido un cambio de contexto y no de modo, ya que ambas se realizan en modo kernel, por ser el sistema operativo quien debe atenderlas. b) F, la ejecución de una syscall implica además un cambio de contexto, ya que se le solicita al sistema operativo que la ejecute por lo cual debe de hacerse un cambio de modo y de contexto para su correspondiente procesamiento, y al finalizar se ha de devolver el contexto al proceso y el modo debe de ser cambiado a modo usuario"
+    },
+    {
+      "pregunta": "En un sistema ya funcional, nos solicitan como requerimiento agregar una función externa que se sabe que tiene memory leaks. Dada la opción de crear un nuevo proceso o un nuevo hilo cada vez que se quiere correr la misma, explique qué alternativa elegiría y por qué. ¿Tiene alguna desventaja el enfoque elegido?",
+      "respuesta": "En este caso, dado que sabemos que la función externa tiene un memory leak, y teniendo la posibilidad de correrla en un proceso o un hilo, la mejor opción es correrla en un proceso, ya que cuando la misma finalice, la memoria “leakeada” se devolverá ya que finalizará el proceso también. La desventaja de este enfoque es que la creación de un proceso es más costosa que la creación del hilo."
+    },
+    {
+      "pregunta": "En un sistema con planificación RR en que se ejecutan procesos que implementan ULTs y realizan ráfagas de I/O cortas ¿Aprovecharían el uso de jacketing si el quantum fuera chico? En este mismo sistema. ¿Podría un ULT encontrarse en estado ‘Running’ mientras que su Proceso asociado está en estado ‘Ready’? Justifique.",
+      "respuesta": "No se aprovecharía mucho el uso de jacketing ya que aunque el proceso no se bloquee tras una operación de I/O, lo más probable es que el mismo sea desalojado al poco tiempo por lo que no aprovecharía a ejecutar mientras se realiza la operación. Por otro lado, si el sistema operativo utiliza un algoritmo de planificación RR o si se produjera una interrupción durante la ejecución de un ULT que provoque desalojar al proceso de la CPU, el estado del mismo pasaría de Running a Ready, pero el ULT dado que no es conocido por el sistema operativo, no tiene manera de actualizar su estado, quedando en Running a pesar de que su proceso se encuentre en Ready."
+    },
+    {
+      "pregunta": "Explique qué problemas puede traer que dos hilos del mismo proceso accedan a una variable compartida. ¿Qué condiciones se tienen que dar para que este problema ocurra?",
+      "respuesta": "Dos hilos accediendo a una variable compartida puede traer condiciones de carrera si el acceso no es sincronizado correctamente. Para que sea un problema, al menos uno de los hilos tiene que estar modificando la variable y tiene que haber posibilidad de concurrencia en el acceso a la misma."
+    },
+    {
+      "pregunta": "Explique detalladamente qué sucede cuando un proceso se encuentra ejecutando y ocurren dos interrupciones enmascarables sucesivas (diferidas en el tiempo), teniendo la segunda mayor prioridad que la primera. Asuma que las interrupciones están habilitadas ¿Podría ocurrir un cambio de proceso inmediatamente después?",
+      "respuesta": "La instrucción del proceso que se está ejecutando finalizará y luego, cómo están habilitadas las interrupciones, se atenderá la primera. Para ello, el contexto del proceso es apilado en el stack del sistema y el contexto de la interrupción es cargado en el procesador. Se comenzarán a ejecutar las instrucciones correspondientes a la rutina de la primera interrupción y, cuando llegue la segunda, ocurrirán eventos similares. El contexto de la rutina de la primera interrupción será apilado en el stack del sistema y se procederá a atender la segunda interrupción. Cuando su rutina finalice, se retomará la ejecución de la primera, y al finalizar esta, continuará ejecutando el proceso. Es posible que se dé un cambio de proceso luego de atender las interrupciones, si el planificador de corto plazo planifica utilizando desalojo."
+    },
+    {
+      "pregunta": "Detalle qué estructuras son creadas en el sistema cuando se crea un proceso y posteriormente el mismo crea un hilo. ¿Podría este nuevo hilo crear otro?",
+      "respuesta": "Al crear un proceso, se crea su PCB que contiene al menos su identificador, contador de programa y otros registros del CPU e información del estado de proceso y de Sería posible que cualquier hilo del proceso cree un nuevo hilo y todos tendrían la misma jerarquía."
+    },
+    {
+      "pregunta": "Explique las ventajas y las desventajas de usar algoritmos de planificación con desalojo por sobre aquellos que no tienen desalojo. ¿Es posible que un algoritmo con desalojo produzca inanición?",
+      "respuesta": "Utilizar algoritmos de planificación con desalojo le permite al Sistema Operativo tener más control de los procesos que están ejecutando en la CPU, ya que los mismos pueden replanificar cuando un proceso llega a Ready, permitiendo que los procesos que son más prioritarios accedan más rápido a la CPU y evitando la monopolización de la misma por procesos CPU Bound con baja prioridad. La principal desventaja es que, al tener en cuenta más eventos, el overhead es mayor, ya que la cantidad de decisiones que tiene que tomar es más grande. Sí, un algoritmo con desalojo podría producir inanición de todos modos. SJF con desalojo es un ejemplo de esto, ya que el algoritmo podría elegir constantemente otros procesos con ráfagas más cortas por sobre uno con ráfagas largas y el mismo podría nunca acceder a la CPU."
+    },
+    {
+      "pregunta": "Responda con V o F y justifique en ambos casos: a. Los semáforos utilizados para proteger la consistencia de una variable global o recurso compartido pueden generar problemas a pesar de ello. b. Un recurso compartido entre N hilos en modo lectura que se utiliza concurrentemente es indispensable protegerlo para administrar correctamente su uso.",
+      "respuesta": "a) Verdadero, el uso de semaforos (tipo mutex) para proteger recursos compartidos podría generar Deadlock si por ejemplo dos hilos solicitan los mismos recursos pero de manera cruzada, ya que no se está garantizando una sincronización en el uso del recurso sino la consistencia del mismo. b) Falso, depende del tipo de recurso que se esté leyendo y principalmente si este al leerse se consume o no, siendo verdadero para el primer caso dado que al consumirse el resto de los hilos no lo tendrán disponible (ejemplo lista compartida), a diferencia de si el recurso no se consume, su lectura concurrente no se ve afectada (ejemplo var. global)."
+    },
+    {
+      "pregunta": "Explique la diferencia entre Livelock y Deadlock. Detalle bajo qué criterios seleccionaría cada uno de los mecanismos de tratamiento de deadlock para un sistema determinado.",
+      "respuesta": "Livelock: es una situación (problema) donde múltiples procesos/hilos cambian continuamente sus estados en respuesta a cambios en otros procesos sin realizar ningún trabajo útil mientras tanto, generando mucho overhead, por otro lado Deadlock es una situación en la que varios procesos se bloquean entre sí debido a que estos tienen recursos asignados que está solicitando el otro proceso para poder avanzar. Prevención sería idóneo para un sistema donde necesite no caer nunca en deadlock, tener bajo overhead y pueda evitar alguna de sus condiciones, Evasión es útil para sistemas en los cuales el overhead no sea un factor determinante y necesite evitar el deadlock, mientras que la estrategia de Detección y Recupero sería candidato para sistemas donde la ocurrencia de deadlock no sea crítica pero se requiera tratarlo, por otro lado No hacer nada es una opción viable para sistemas donde la ocurrencia o no de esta problemática no sea importante al igual que su tratamiento."
+    },
+    {
+      "pregunta": "¿Cómo se relacionan las interrupciones con los cambios de contexto y cambios de modo? ¿Podría ocurrir un cambio de contexto sin cambio de modo? Ejemplifique.",
+      "respuesta": "Para atender una interrupción (etapa final del ciclo de instrucción), el procesador cambia a modo kernel, se guarda el contexto actual y carga el contexto de la rutina correspondiente a la atención de esa interrupción. Si el contexto anterior ya estaba en modo kernel, por ejemplo porque se estaba ejecutando la rutina correspondiente de otra interrupción o una syscall, no habría cambio de modo pero sí de contexto."
+    },
+    {
+      "pregunta": "Luciano posee un servidor para que su alumnado de SisOp pueda cargar consultas. El mismo cuenta con 8 CPUs y se desea que atienda peticiones de forma concurrente priorizando que ante una eventual falla no deje de atender peticiones y pueda recuperarse. ¿Crearía procesos, hilos (y de qué tipo) o una combinación de estos para atender las peticiones? Justifique. Mencione alguna desventaja que pueda identificar de su propuesta.",
+      "respuesta": "Lo más seguro sería crear un proceso por cada petición, de esta manera, aunque algunas de estas fallen y su proceso finalice, no afectarían al resto de los procesos/peticiones. Como desventaja principal, esta propuesta no es tan eficiente en el uso de recursos como utilizar hilos dentro de un mismo proceso."
+    },
+    {
+      "pregunta": "Compare los algoritmos de “FIFO”, “Prioridades (con desalojo)” y “Round Robin” en términos de: overhead, starvation, posibilidad de que algún proceso monopolice la CPU.",
+      "respuesta": "FIFO: tiene el menor overhead, ningún proceso puede sufrir starvation pero cualquiera puede monopolizar la CPU. RR: puede tener mucho overhead por cambios de contexto si su Q es pequeño, los procesos no sufren starvation ni pueden monopolizar la CPU. Prioridades con desalojo: su overhead suele ser bajo pero puede ser mayor si ocurren desalojos frecuentes, los procesos de menor prioridad podrían sufrir starvation mientras que los de prioridad máxima podrían monopolizar la CPU."
+    },
+    {
+      "pregunta": "Responda Verdadero o Falso, justificando en ambos casos: a. Si tenemos 2 o más procesos accediendo a un recurso en común en forma concurrente se considera una región crítica y debemos sincronizarlo. b. Puede ser más performante utilizar semáforos implementados con espera activa que con bloqueo si la región crítica es muy corta.",
+      "respuesta": "a. Falso, además de acceder al recurso en forma concurrente, al menos uno de ellos debe ser en modo escritura. b. Verdadero (podría considerarse como falso también), podría ser más performante ya que si la región crítica es corta ese tiempo de espera activa podría ser mejor a tener que bloquearse y luego volver elegido para ejecutar, sin embargo esto solamente es cierto si nuestro sistema tiene más de 1 CPU."
+    },
+    {
+      "pregunta": "En el ciclo de una instrucción, ¿Puede ocurrir que una interrupción llegue antes de la etapa de “EXECUTE” y sea atendida en ese preciso instante? Justifique.",
+      "respuesta": "Si bien una interrupción puede producirse en cualquier instante del ciclo de instrucción, esta será atendida únicamente en la fase posterior a la de ejecución, que está dedicada a el tratamiento de interrupciones."
+    },
+    {
+      "pregunta": "El planificador de mediano plazo, ¿Se encarga de controlar el nivel de multiprogramación? En caso afirmativo justifique con algún ejemplo, en caso contrario indique cuál/es tiene/n dicha responsabilidad",
+      "respuesta": "El planificador de mediano plazo influye mucho en el grado de multiprogramación, ya que puede quitar parcialmente procesos de memoria para liberarla y alojarlos en disco, pero si pensamos en un sistema operativo con un diagrama de 5 estados, sin planificador de mediano plazo, el que termina influyendo en el mismo es el de largo plazo, ya que enviara “procesos a memoria” (NEW -> READY) o los quitara (x->EXIT )"
+    },
+    {
+      "pregunta": "Considere un proceso con 3 hilos, uno está Bloqueado, otro Listo y otro En Ejecución. Entonces podríamos entonces afirmar que: a. Si son ULTs el estado del proceso es En Ejecución. b. Si son KLTs el estado del proceso es Bloqueado.",
+      "respuesta": "a) Falso, si son ULTs SIN JACKETING, con que un hilo se bloquee, el proceso también se bloqueara. b) Falso, ya que los KLTs son conocidos por el sistema operativo, si uno de estos se bloquea, no bloqueara al resto, como sí sucede con los ULTs."
+    },
+    {
+      "pregunta": "Indique verdadero o falso, y justifique brevemente: a. Cuando un proceso crea otro, ambos comparten los espacios de memoria dinámica reservados pero no la memoria estática. b. Todo cambio de proceso implica al menos dos cambios de modo de ejecución.",
+      "respuesta": "a) Falso, no comparten la memoria dinámica, solamente compartirán el código que posean y con respecto a la memoria estática, tendrá una copia de la que tenía el proceso que lo creó. b) Verdadero, todo cambio de procesos implica al menos dos cambios de modo de ejecución, ya que es el sistema operativo quien realiza este cambio, por lo que debe de pasar de Modo Usuario -> Modo Kernel -> Modo Usuario"
+    },
+    {
+      "pregunta": "Si consideramos un solo proceso con un único hilo, y una cantidad limitada de recursos críticos, podemos entonces afirmar que: a. Se podría dar interbloqueo b. Se podría dar inanición Justifique con un ejemplo los casos donde la afirmación resulte verdadera.",
+      "respuesta": "a) Falso, dado que un interbloqueo involucra al menos 2 entidades (procesos o hilos) dado que por definición una entidad posee recursos que la otra requiere y viceversa, en conclusión, en este contexto nunca podría ocurrir. b) Verdadero, en el unico caso que un proceso podria sufrir inanición bajo este contexto, es teniendo un sistema en el cual el tratamiento de deadlock no verifique la cantidad de instancias de los recursos que el proceso requiere para su ejecución, de manera tal que pueda querer utilizar más de los que existan y el sistema operativo no mandar a ejecutar dicho proceso."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos. a. La atención de una interrupción implica al menos un cambio de modo independientemente de qué se esté ejecutando. b. Una llamada al sistema (syscall) implica únicamente dos cambios de modo.",
+      "respuesta": "a) F, si la interrupción se produjo durante la atención de otra interrupción, solamente es requerido un cambio de contexto y no de modo, ya que ambas se realizan en modo kernel, por ser el sistema operativo quien debe atenderlas. b) F, la ejecución de una syscall implica además un cambio de contexto, ya que se le solicita al sistema operativo que la ejecute por lo cual debe de hacerse un cambio de modo y de contexto para su correspondiente procesamiento, y al finalizar se ha de devolver el contexto al proceso y el modo debe de ser cambiado a modo usuario."
+    },
+    {
+      "pregunta": "¿Puede ocurrir que algunos procesos sufran starvation si el sistema operativo utiliza un algoritmo de planificación sin desalojo? Justifique.",
+      "respuesta": "Los algoritmos sin desalojo son más propensos a monopolizar la CPU, por lo cual podrían llegar a generar que otros procesos entren en starvation, otro ejemplo podría ser utilizando un algoritmo como SJF sin desalojo donde siempre entren procesos más chicos que un proceso o grupo de procesos, produciendo que estos entren en starvation."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos. a. Un ULT podría encontrarse en estado 'Running' mientras que su Proceso asociado está en estado ‘Ready’ b. Si una biblioteca de ULTs utiliza un algoritmo sin desalojo y las I/O se realizan invocando directamente a las syscalls, es imposible que ocurra un thread switch sin que un hilo finalice",
+      "respuesta": "a) V, si el sistema operativo utiliza un algoritmo de planificación como RR o si se produjera una interrupción durante la ejecución de un ULT que provoque desalojar al proceso de la CPU, el estado del mismo pasaría de Running a Ready, pero el ULT dado que no es conocido por el sistema operativo, no tiene manera de actualizar su estado, quedando en Running a pesar de que su proceso se encuentre en Ready. b) V, ya que si los ULTs implementan en su biblioteca un algoritmo de planificación sin desalojo, los únicos momentos donde podría darse un thread switch son cuando finaliza uno de los ULTs permitiendo que continúe utilizando la CPU otro del mismo proceso o bien, cuando se utilizan wrappers para replanificar tras una IO, dado que esta última no sucede por ejecutar directamente las syscalls, sólo nos queda la primer opción."
+    },
+    {
+      "pregunta": "Explique porqué es necesario proteger aquellos recursos compartidos que puedan ser accedidos y modificados por distintos hilos. ¿Cómo podría protegerlos de este problema? De un ejemplo.",
+      "respuesta": "Es necesario protegerlos debido a que en caso de no hacerlo podría darse una condición de carrera, produciendo que el recurso pueda quedar inconsistente, devolviendo valores no esperados, para ello se pueden utilizar semáforos tipo mutex para evitar que varios hilos accedan a estos recursos compartidos de manera “controlada” evitando la condición de carrera. Un ejemplo podría ser un contador manipulado por varios hilos, donde al incrementar la variable global, se interrumpa el uno al otro, produciendo valores inconsistentes."
+    },
+    {
+      "pregunta": "En un sistema que controla un respirador artificial, ¿cuáles podrían ser estrategias válidas y cuáles no para el tratamiento de deadlocks? ¿Influiría en algo si el sistema no pudiera tolerar mucho overhead?",
+      "respuesta": "Las estrategias válidas son aquellas donde NO se produzca bajo ninguna circunstancia deadlock, ya que en este caso podría ser muy perjudicial la existencia de uno, por lo que las estrategias de Detección y Recupero, y la estrategia de no tratarlo no son de utilidad en este sistema, quedando como posibles soluciones la de Prevención y la de Evasión; en caso de que el sistema no sea tolerante la overhead, se ha de descartar la estrategia de evasión, dado que se realizan constantes verificaciones ante cada solicitud de recursos, mientras que en prevención, son “reglas predefinidas” por lo cual se reduce drásticamente el overhead y asegura la no existencia de deadlock."
+    },
+    {
+      "pregunta": "Describa en detalle qué ocurre cuando un proceso ejecuta una llamada al sistema. ¿Qué ocurre si llega una interrupción mientras se ejecuta la rutina de la llamada al sistema?",
+      "respuesta": "Se realiza un cambio de contexto y un cambio de modo (usuario => kernel), esto implica guardarse el contexto de ejecución (registros, PC, PSW, etc) del proceso en ejecución en la pila del sistema y cargar el nuevo contexto de ejecución de la rutina del SO que corresponda a esa syscall. Si llega una interrupción durante la ejecución de esta rutina, el procedimiento es similar, se debe cambiar el contexto pero en este caso no de modo ya que la CPU ya estaría ejecutando en modo kernel."
+    },
+    {
+      "pregunta": "Responda Verdadero o Falso, justificando en ambos casos:\na. Realizar un cambio de proceso entre procesos que implementan ULTs no requiere\ncambiar a modo kernel ya que el cambio entre ULTs se realiza en modo usuario.\nb. En sistemas multiprocesador es más performante utilizar KLTs en lugar de ULTs",
+      "respuesta": "a) Falso, el cambio de proceso lo realiza el SO y por lo tanto se requiere estar en modo kernel. El cambio entre ULTs se realiza en modo usuario siempre que estemos hablando de hilos pares (pertenecientes al mismo KLT/Proceso) ya que sería realizado por su biblioteca de hilos. b) Verdadero, utilizar KLTs en sistemas multiprocesador permite que los mismos se ejecuten en paralelo ya que el SO puede planificarlos en las distintas CPU."
+    },
+    {
+      "pregunta": "Proponga un algoritmo de planificación de corto plazo (detallando, si fuera necesario, cantidad de colas, transiciones, estimaciones, quantum, etc) que busque optimizar el tiempo de espera promedio de los procesos ordinarios del sistema, pero que ejecute lo antes posible a los procesos críticos cuando éstos lo necesiten. Se sabe que el sistema tiene una sola CPU y que todos los procesos ordinarios se consideran I/O bound, pero debido a un bug algunos pueden sufrir espera activa indefinidamente.",
+      "respuesta": "Propondría un algoritmo de planificación de colas multinivel con dos colas: - Cola 1 (de mayor prioridad, para procesos críticos): FIFO - Cola 2 (de menor prioridad, para procesos ordinarios): VRR Se pide que los procesos críticos se ejecuten lo antes posible por lo que el algoritmo de prioridades entre colas sería con desalojo. VRR prioriza más frecuentemente a los procesos más cortos, reduciendo el tiempo de espera promedio y garantizando que ningún proceso monopolice la CPU. El quantum debería alcanzar para que la mayoría de las ráfagas finalicen normalmente. Otra opción podría ser SRT pero al estimar podría ejecutarse un proceso que termine ejecutando indefinidamente y no se lo desalojaría."
+    },
+    {
+      "pregunta": "Describa brevemente el concepto de condición de carrera. Provea un ejemplo de pseudocódigo donde se encuentre presente y explique por qué es un problema difícil de detectar si se observa solamente la ejecución del programa.",
+      "respuesta": "Condición de carrera es una situación bajo la cual dos o más procesos/hilos comparten recursos y el estado final de los mismos luego de ejecutar no siempre es determinístico al depender de la velocidad relativa de ejecución de cada proceso/hilo y varios otros factores. Un ejemplo es el de varios hilos modificando una variable global de la forma CONTADOR++. Es difícil de detectar porque algunas veces podría arrojar resultados coherentes dependiendo de la ejecución, por lo tanto no sería tan evidente el error."
+    },
+    {
+      "pregunta": "Explique el ciclo de ejecución, indique en cuál etapa son atendidas las interrupciones, y proporcione dos ejemplos de interrupciones, donde al menos una de ellas provenga del procesador.",
+      "respuesta": "El ciclo de ejecución de una instrucción está formado por las etapas de Fetch (traer instrucción), Decode (decodificar y validar instrucción) y Execute (ejecutar instrucción). Luego como 4ta etapa se realiza la verificación de Interrupciones pendientes. Un ejemplo de una interrupción provista por la cpu (también conocida como interrupción de software) sería la generada por una división por cero. Un ejemplo de una generada de forma externa sería una de I/O (también conocida como interrupción de hardware)"
+    },
+    {
+      "pregunta": "¿Sería posible que un ULT, perteneciente a un KLT, cree otro ULT, un nuevo KLT, y un nuevo Proceso? Responda justificando y realice un diagrama con todas las entidades que terminarían existiendo en el sistema, indicando las relaciones entre ellos (imagine también que existía una variable global en el proceso original).",
+      "respuesta": "Sí, sería posible que se crearan todas esas entidades. El resultado sería: Proceso 1 (Variable Global compartida entre todos los hilos de Proceso 1) \\- KLT1: {ULT1, ULT_NUEVO] \\- KLT_NUEVO Proceso 2 (hijo de Proceso 1)"
+    },
+    {
+      "pregunta": "Mencione cuáles planificadores inciden sobre el grado de multiprogramación y de qué manera lo hacen. ¿En qué planificador es más importante minimizar el overhead? ¿Por qué?",
+      "respuesta": "Los planificadores que inciden sobre el grado de multiprogramación son el de largo plazo, admitiendo y gestionando la finalización de procesos en el sistema y el de mediano plazo, suspendiendo y restableciendo procesos. Es importante que el planificador de corto plazo posea el menor overhead posible ya que es el más frecuentemente se ejecuta."
+    },
+    {
+      "pregunta": "Responda Verdadero o Falso. Justifique: a. Toda variable que es compartida por más de un proceso o hilo y en la que al menos un proceso realice modificaciones, debe ser considerada sección crítica. b. Usar hilos de kernel previene la condición de carrera porque son provistos por el sistema operativo.",
+      "respuesta": "a. Falso: Es necesario, además, que exista la posibilidad de concurrencia para que sea un problema. b. Falso: Los hilos de kernel también pueden sufrir condición de carrera si comparten recursos."
+    },
+    {
+      "pregunta": "Explique las cuatro condiciones para que exista Deadlock. Elija dos de ellas para mencionar de qué manera se puede prevenir que ocurra Deadlock. Dé un ejemplo para cada caso.",
+      "respuesta": ".Las cuatro condiciones son: 1) Mutua exclusión: Provoca que los procesos se bloqueen. 2) Retención y espera: Implica que existan recursos asignados a un proceso y que quede a la espera de otro proceso. 3) Sin desalojo de recursos: El SO no desaloja los recursos asignados a los procesos. 4) Espera Circular: Se produce cuando en un conjunto de procesos, cada proceso tiene asignado un recurso requerido por el siguiente proceso del grupo, y a su vez el último proceso tiene un recurso requerido por el primero. Modo de prevenir (sólo se debe mencionar dos): -Mutua exclusión: Permitir que los procesos accedan simultáneamente a una sección crítica. Depende del recurso y su uso. -Retención y espera: Solicitar todos los recursos que se utilizar al comienzo de la ejecución o solicitar un recurso, utilizarlo y liberarlo antes de solicitar otro. -Sin desalojo: Que el sistema operativo pueda desalojar recursos asignados a un proceso para asignarlos a otro. No puede utilizarse para cualquier recurso. Sólo para los que pueden volver a un estado anterior o guardar su estado. -Espera circular: Asignar un orden a los recursos y asegurar que los procesos los soliciten sin alterar el orden."
+    },
+    {
+      "pregunta": "Responda V o F y justifique: a. Un programa compilado para correr como un proceso estándar con instrucciones privilegiadas, nunca podría ejecutarlas exitosamente. b. Si un proceso lograra modificar el registro PC de forma malintencionada, podría ejecutar exitosamente instrucciones no privilegiadas por fuera de su espacio de direcciones.",
+      "respuesta": "a. Verdadero. Esto se debe a que corren en modo usuario, y si intentaran ejecutar una instrucción privilegiada se produciría una interrupción indicando un error. b. Falso. Un proceso que puede modificar el PC de forma malintencionada podrá disponer de todo el código contenido en el espacio de direcciones del mismo, pero el hardware validará cualquier intento de acceso por fuera del mismo y lanzará una interrupción que derivará en un error."
+    },
+    {
+      "pregunta": "¿Qué eventos tienen en cuenta los algoritmos de planificación con desalojo al momento de re-planificar? ¿Por qué los algoritmos sin desalojo no? Explique y justifique cada caso.",
+      "respuesta": "Los algoritmos con desalojo tienen en cuenta los mismos eventos de los algoritmos sin desalojo (bloqueo del proceso por syscall y finalización del mismo), y consideran también el evento que derive en un ingreso a la cola de Ready (syscalls de creación de hilos/procesos, o interrupciones que indiquen fin de ráfaga o fin de I/O). Los algoritmos sin desalojo descartan estos últimos eventos porque deciden no expropiar la cpu al proceso una vez que la misma fue asignada."
+    },
+    {
+      "pregunta": "Describa brevemente al menos dos algoritmos de planificación de procesos para un sistema en el cual se priorice evitar starvation y minimizar el overhead ¿En qué instantes interviene el sistema operativo en la planificación según los algoritmos propuestos?",
+      "respuesta": "Los algoritmos de planificación que no sufren starvation y minimizando su overhead son FIFO y Round robin, ya que FIFO planifica los procesos según van situándose en orden a la cola de ready siendo ejecutados en el mismo orden en que fueron ingresados y es el algoritmo con menos overhead debido a que es el más básico, por otro lado RR funciona como FIFO con el agregado de mantener cierta equidad en el uso de la CPU enviando interrupciones cada vez que un proceso agote su Quantum. En FIFO el sistema operativo se involucra en los instantes donde se ejecute alguna syscall que provoque un bloqueo del proceso y durante la finalización del mismo, mientras que en RR además interviene cada vez que se lance una interrupción por fin de Quantum debido a que esta debe ser atendida para desalojar al proceso en cuestión"
+    },
+    {
+      "pregunta": "Si uno quisiera proteger una mutua exclusión entre ULTs del mismo proceso ¿Traería algún problema utilizar semáforos mutex provistos por el sistema operativo? Justifique",
+      "respuesta": "Utilizar semáforos mutex provistos por el SO implicaría que ante un wait() se bloquee todo el Proceso/KLT y por lo tanto el mismo nunca se desbloquee si el signal() se suponía que lo haga uno de sus ULTs pares."
+    },
+    {
+      "pregunta": "Para cada una de las 3 estrategias de tratamiento de Deadlock explique claramente qué acciones de la misma generan overhead y de qué manera limita cada una la forma en la que se pueden pedir recursos en el sistema.",
+      "respuesta": "Overhead generado: La estrategia de prevención es la que menos overhead genera ya que son políticas del SO definidas a priori. La estrategia de evasión requiere que ante cada petición de recursos se ejecute el algoritmo del banquero, con lo cual puede ser bastante alto. En la estrategia de detección y recuperación el overhead es causado por la ejecución del algoritmo para detectar deadlock, con lo cuál depende de cada cuánto se corra el mismo. Además hay un overhead asociado a cada posible estrategia de recuperación, siendo menor en los casos en que se finalizan todos los procesos y siendo mayor en los casos en que se elige una víctima en particular ya que hay un costo asociado a la hora de seleccionarla y otro a la hora de verificar que realmente se haya solucionado. Limitaciones a la hora de pedir recursos: La estrategia menos restrictiva es la de detección y recuperación ya que no limita de ninguna manera la forma o la cantidad de recursos a pedir. Evasión requiere que se declaren de antemano la cantidad máxima de recursos a utilizar con lo cuál de alguna forma restringe la cantidad de recursos que un proceso puede pedir. En este aspecto la estrategia más restrictiva es la de prevención, que dependiendo de la política podría forzar a que los recursos deban ser pedidos en un orden específico, por ejemplo."
+    },
+    {
+      "pregunta": "¿Cuántos cambios de modo implica una función “wrapper”, como mínimo? ¿La cantidad total de cambios de modo de qué depende?",
+      "respuesta": "Como mínimo un wrapper tendría dos, uno para ir a modo kernel, y otro para volver a modo usuario. La cantidad de cambios de modo depende de la cantidad de syscalls que realice dicha función (podrían ser más que 2 si se realizan varias syscalls en la misma función wrapper)."
+    },
+    {
+      "pregunta": "Indique si es verdadera o falsa la siguiente afirmación, justificando en ambos casos: Atender una interrupción anidada implica un cambio de contexto y un cambio de modo.",
+      "respuesta": "Falso. Al estar el sistema operativo ya atendiendo una interrupción, sólo sería necesario un cambio de contexto"
+    },
+    {
+      "pregunta": "Mencione al menos tres algoritmos de corto plazo que prioricen de alguna forma procesos con ráfagas cortas. ¿Qué forma tiene el sistema operativo de conocer la próxima ráfaga de un proceso para aplicar alguno de estos algoritmos?",
+      "respuesta": "Algoritmos: SJF (con/sin desalojo), HRRN, Feedback Multinivel. El sistema operativo solo puede estimar las ráfagas futuras mediante alguna fórmula como la de la media exponencial."
+    },
+    {
+      "pregunta": "Describa brevemente las estrategias o soluciones para lograr la mutua exclusión, indicando cuáles generan espera activa.",
+      "respuesta": "Estrategias a. Solución de software: genera espera activa b. Hardware: deshabilitar interrupciones: no genera espera activa c. Hardware: instrucciones especiales: requieren espera activa d. Semáforos / monitores: no generan espera activa"
+    },
+    {
+      "pregunta": "En un sistema que controla un respirador artificial, ¿cuáles podrían ser estrategias válidas y cuáles no para el tratamiento de deadlocks? ¿Influiría en algo si el sistema no pudiera tolerar mucho overhead?",
+      "respuesta": "Tanto Prevención como Evasión serían estrategias válidas, dado que es obligatorio que el sistema no sufra ningún tipo de bloqueo permanente ni sacrificar su funcionamiento en un recupero. En caso de que no se pueda tolerar cierto overhead, Prevención sería mejor dado que Evasión implica un overhead en el análisis del estado del sistema que se realiza con frecuencia."
+    },
+    {
+      "pregunta": "Describa los modos de ejecución en una computadora. ¿Cuáles son los eventos que podrían generar un cambio hacia modo kernel?",
+      "respuesta": "Modos de ejecución: a. Modo kernel: se pueden ejecutar todas las instrucciones disponibles en la cpu. Es usado por el Sistema Operativo. b. Modo usuario: se pueden ejecutar solamente las instrucciones no privilegiadas. Es usado por los Procesos. Eventos que podrían generar un cambio a modo kernel: - Interrupción - Syscall"
+    },
+    {
+      "pregunta": "En caso de disponer de un SO con soporte para hilos a nivel kernel, indique cuáles atributos del proceso/hilo estarían exclusivamente en el PCB y cuales en el TCB (brinde al menos 2 ejemplos para cada caso). ¿Podría un hilo en este sistema leer la información de su TCB?",
+      "respuesta": "Atributos: a. Exclusivamente en PCB: PID, PPID, recursos asignados (archivos, memoria), limites de memoria b. Exclusivamente en TCB: contexto de ejecución, estado, puntero a la pila Un hilo no podría leer su TCB, dado que al ser un hilo de kernel su estructura se encuentra en espacio del sistema operativo."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos. a. Si una biblioteca de ULTs utiliza un algoritmo sin desalojo y las I/O se realizan invocando directamente a las syscalls, es imposible que ocurra un thread switch sin que un hilo finalice. b. Un semáforo con espera activa es una solución menos performante en todos los casos.",
+      "respuesta": "a. Verdadero, al no conocer la entrada salida y al ser el algoritmo no expropiativo, sería imposible que la biblioteca decida cambiar de hilo sin que el mismo finalice, ya que una vez pase a ejecutar un hilo, nunca volvería a encolarse (no lo haría luego de una entrada salida, y la biblioteca nunca lo desalojaría). b. Falso. En un sistema multiprocesador y una sección crítica no muy extensa suele ser más eficiente utilizar una solución con espera activa ya que el hecho de no bloquear procesos minimiza el overhead y en ese escenario no sería frecuente que los procesos deban desperdiciar varias ráfagas de CPU para ingresar a la sección crítica."
+    },
+    {
+      "pregunta": "¿Por qué los semáforos necesitan soporte del sistema operativo? ¿Qué los diferencia de una solución de software?",
+      "respuesta": "Los semáforos necesitan ejecutar su código de forma atómica para evitar los problemas de las condiciones de carrera y en su implementación deben bloquear procesos, por lo cuál las mismas son herramientas provistas por el sistema operativo. Las soluciones de software como la solución de Peterson utilizan espera activa y en general requieren mucho código para ser implementadas y suelen estar limitadas a 2 procesos."
+    },
+    {
+      "pregunta": "Indique la relación que existe entre los términos de condición de carrera, sección crítica y exclusión mutua. Proponga dos técnicas para asegurar la exclusión mutua.",
+      "respuesta": "Una condición de carrera se produce cuando procesos o hilos comparten recursos y según el orden en que se ejecutaron puede variar el resultado. La sección crítica es la parte del proceso donde puede producirse la condición de carrera y para evitarla se deben utilizar técnicas de exclusión mutua. Se puede utilizar semáforos o monitores para asegurar la exclusión mutua."
+    },
+    {
+      "pregunta": "Responda Verdadero o Falso justificando: a. La estrategia de Detección evita que se produzca Deadlock, analizando cada solicitud de recursos antes de que sea asignado. b. Evitar la retención y espera puede producir una baja tasa de utilización de recursos.",
+      "respuesta": "a) Falso: No evita el Deadlock. El algoritmo de detección se ejecuta periódicamente para detectar y recuperar deadlocks. b) Verdadero: Al evitar la retención y espera puede asignarse todos los recursos que necesite un procesos aunque no los necesite inmediatamente, impidiendo que otro proceso los utilice."
+    },
+    {
+      "pregunta": "Describa en detalle algún ejemplo del caso en el cual un proceso realiza una syscall y termina siendo bloqueado. ¿Qué implicancias tendría si dicha syscall hubiera sido ejecutada en forma no bloqueante?",
+      "respuesta": "Un ejemplo podría ser realizar una lectura de disco y que el mismo se encuentre ocupado, por lo que el sistema operativo bloquearía al proceso hasta que la i/o en curso finalice, para evitar overhead de parte del proceso. En caso de que la syscall fuera no bloqueante, el proceso no se bloquearía y seguiría ejecutando, teniendo que reintentar la operación realizando espera activa."
+    },
+    {
+      "pregunta": "¿Qué utilidad tiene disponer de un máximo nivel de multiprogramación en un sistema? ¿Cuáles serían las consecuencias de configurarlo en niveles extremadamente bajos o altos?",
+      "respuesta": "El máximo nivel de multiprogramación permite limitar la carga de un sistema en términos de procesos activos, evitando que el mismo quede sobrecargado disminuyendo la productividad del mismo. Configurarlo en niveles muy altos sería equivalente a que el límite no existiera. Configurarlo en niveles muy bajos bajaría la productividad del sistema innecesariamente, porque varios procesos esperarían con la cpu probablemente ociosa."
+    },
+    {
+      "pregunta": "Mencione alguna razón por la cual se podrían deshabilitar las interrupciones enmascarables temporalmente. ¿Debería el SO ser el único con la responsabilidad para realizar dicho cambio?",
+      "respuesta": "Un motivo para deshabilitar las interrupciones podría ser una syscall de semáforos que esté implementada deshabilitando las mismas para lograr no ser interrumpida en el manejo de las estructuras de los semáforos. Sí, el SO debería ser el único en poder realizar dicho cambio por cuestiones de seguridad y control del sistema."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos. a. La atención de una interrupción implica al menos un cambio de modo y un cambio de contexto, independientemente de qué se esté ejecutando. b. Una llamada al sistema (syscall) implica al menos un cambio de modo y un cambio de contexto",
+      "respuesta": "a. F. Si actualmente se está ejecutando en modo Kernel, por ejemplo, la rutina de atención de otra interrupción o la llamada a una syscall, no se necesitaría realizar un cambio de modo para cambiar el contexto y atender la interrupción pendiente. b. V. Las llamadas al sistema son realizadas por los procesos de usuario, por lo que las mismas deben cambiar a modo Kernel no solo para poder cambiar de contexto sino también porque normalmente las mismas terminan ejecutando instrucciones privilegiadas."
+    },
+    {
+      "pregunta": "¿Qué ventajas se podrían obtener de combinar KLTs con ULTs dentro de un mismo Proceso? ¿Sería posible forzar, desde el Sistema Operativo, a que todos los ULTs usados tengan jacketing?",
+      "respuesta": "Se podría lograr manejar concurrencia sin bloquear distintos hilos, cuando por ejemplo realizaran tareas bloqueantes, mientras al mismo tiempo dentro de un KLT que sea cpu-bound realizar tareas concurrentes con muy bajo overhead. No sería posible forzar jacketing para todos los ULTs, dado que el sistema operativo no puede forzar a que un proceso use una biblioteca en particular, y los ULTs no son administrados por el S.O."
+    },
+    {
+      "pregunta": "Explique por qué un proceso suspendido puede no estar a la espera de un evento y dé un ejemplo de cómo un proceso bloqueado puede llegar a ese estado.",
+      "respuesta": "El proceso puede estar en estado suspendido-listo. Puede ocurrir que mientras espera un evento (bloqueado) sea suspendido (suspendido-bloqueado) y luego se produzca dicho evento. Mientras el planificador de mediano plazo no decida restaurarlo a memoria principal, el proceso queda en estado suspendido-listo."
+    },
+    {
+      "pregunta": "¿Sería recomendable utilizar semáforos mutex para acceder a una constante global en un proceso multihilo? Justifique",
+      "respuesta": "No sería recomendable ya que, al ser una constante, estos accesos serán siempre de lectura, por lo que no habría una condición de carrera. Usar el semáforo de todas maneras generaría un overhead innecesario."
+    },
+    {
+      "pregunta": "Un sistema implementa detección de deadlocks y muy frecuentemente encuentra que un grupo de procesos termina en esa situación por 2 recursos en particular. Al cambiar el código de los mismos para que pidan estos recursos en un orden estricto, el sistema deja de encontrar deadlocks tan frecuentemente. Explique por qué se da esa mejoría. ¿Podría implementarse fácilmente la misma estrategia para todo el sistema? Justifique.",
+      "respuesta": "Al pedir esos recursos en un orden predefinido, ese grupo de procesos ya no podría tener una espera circular por los mismos. Sin embargo, no sería fácil implementar esta misma estrategia para todo el sistema ya que sería muy restrictivo que todos los recursos deban ser pedidos en orden."
+    },
+    {
+      "pregunta": "Describa paso a paso qué ocurriría si un Proceso intentara escribir, por error, una variable perteneciente exclusivamente a otro Proceso. ¿Ocurriría lo mismo si fuera el Sistema Operativo quien escribiera equivocadamente en la variable de un Proceso?",
+      "respuesta": "El Proceso no podría escribir en el espacio de direcciones de otro proceso, por lo tanto se produciría una interrupción. Se produciría un cambio a modo kernel, y el sistema operativo atendería la misma, tomando alguna acción relativa al manejo de dicho error, como por ejemplo finalizar dicho proceso. Si fuera el Sistema Operativo el que escribiera por error, no se produciría interrupción alguna, dado que el SO ejecuta en modo kernel y por lo tanto tiene permisos para acceder a cualquier dirección de memoria (sin embargo, el comportamiento del sistema podría arrojar resultados inesperados)"
+    },
+    {
+      "pregunta": "Compare las técnicas de Prevención, Evasión y Detección de Deadlock en términos de posibilidad de ocurrencia del deadlock, overhead y limitaciones para la solicitud/asignación de recursos.",
+      "respuesta": "Prevención: 1. Posibilidad de ocurrencia: No es posible porque no se cumple una de las condiciones para deadlock. 2. Overhead: Bajo. A diferencia de los anteriores no requiere cálculos con matrices. 3. Limitación para la solicitud: Limitados a las políticas propias del sistema/programador para prevenir alguna de las condiciones. 4. Limitación para la asignación: Limitados a las políticas propias del sistema/programador para prevenir alguna de las condiciones. Evasión: 1. Posibilidad de ocurrencia: No es posible que ocurra, el sistema debe estar siempre es estado seguro. 2. Overhead: Alto, cálculos con matrices con cada solicitud de recurso. 3. Limitación para la solicitud: No hay limitación. 4. Limitación para la asignación: Aunque haya recursos disponibles, puede negarse la solicitud. Detección: 1. Posibilidad de ocurrencia: Es posible que ocurra Deadlock. 2. Overhead: Medio, cálculos con matrices cada ciertos períodos de tiempo o por ciertas condiciones en el sistemas. 3. Limitación para la solicitud: No hay limitación 4. Limitación para la asignación: Mientras existan recursos disponibles, estos son asignados a los procesos a demanda."
+    },
+    {
+      "pregunta": "Considere la existencia de varios Procesos que leen y escriben una porción de memoria compartida y garantizan la mutua exclusión usando un semáforo bien inicializado y bien ubicado ¿Podrían sufrir deadlock? ¿Es posible que alguno de los Procesos sufra inanición sabiendo que el orden de desbloqueo de los Procesos en el semáforo no está garantizado?",
+      "respuesta": "No deberían sufrir deadlock ya que, de estar los wait y signal bien ubicados y el semáforo inicializado correctamente, se garantizará la mutua exclusión y solo uno de los Procesos podrá utilizar la porción de memoria en un momento dado. Básicamente no se cumple la ‘espera y retención’, condición necesaria para la ocurrencia de un deadlock. El deadlock podría presentarse si hay más de un recurso a proteger y más semáforos asociados a estos nuevos recursos. Es posible que alguno de los Procesos sufra starvation, dado que el semáforo no garantiza el orden de desbloqueo de los procesos de su cola ante un signal. De este modo, un proceso podría bloquearse en el semáforo junto a otros, pero no ser desbloqueado si es que existen más procesos que siguen ejecutando un wait sobre ese mismo semáforo y son liberados antes."
+    },
+    {
+      "pregunta": "Responda por V o F justificando en ambos casos. a. Un ULT podría encontrarse en estado 'Running' mientras que su Proceso asociado está en estado ‘Ready’ b. Un microkernel, en comparación con un kernel monolítico, tiene la ventaja de poder agregar nuevas funcionalidades sin la necesidad de recompilar todo el código, pero es menos tolerante a fallos y por ende más inestable.",
+      "respuesta": "a. Cuando un Proceso es desalojado por una interrupción, la biblioteca de hilos de usuarios no se entera, por lo tanto no cambia el estado del ULT que estaba en ejecución en ese momento. En esta situación podría ocurrir que el Proceso llegase a la cola de Ready mientras que el estado del ULT diría Running. b. Un microkernel sí tiene la ventaja de poder agregar nuevas funcionalidades, o arreglar código existente, sin la necesidad de recompilar todo, pero sí es tolerante a fallos, y por ende más estable. Un error en un módulo del microkernel podría no afectar al resto. Pero un error en un kernel monolítico podría ser fatal para todo el sistema."
+    },
+    {
+      "pregunta": "Compare los algoritmos SJF sin desalojo, HRRN y VRR en términos de aging, starvation, prioridad al planificar procesos CPU Bound y prioridad para procesos E/S Bound.",
+      "respuesta": "SJF sin desalojo: 1. Aging: No posee, la prioridad de los procesos no varía mientras espera en Ready. 2. Starvation: Sí, cuando la siguiente ráfaga es grande. 3. Prioridad para procesos limitados por la E/S: Tienen ráfagas de CPU cortas, por lo tanto tienen prioridad alta. HRRN: 1. Aging: Si posee, la prioridad de los procesos aumenta mientras esperan en Ready. 2. Starvation: No. 3. Prioridad para procesos limitados por la E/S: Tienen ráfagas de CPU cortas, por lo tanto tienen prioridad alta. Aunque si existiesen procesos con ráfaga de CPU más largas pero con mayor tiempo de espera, estos podrían tener mayor prioridad. VRR: 1. Aging: No. 2. Starvation: No. 3. Prioridad para procesos limitados por la E/S: Al momento de planificar un proceso, los procesos con ráfaga de CPU chicas (limitados por la E/S) y con ráfaga restante de CPU chica, tienen mayor prioridad frente a los procesos con ráfagas que aprovechan todo el quantum."
+    },
+    {
+      "pregunta": "Peter cambia el código de un pequeño proceso que programó, para utilizar syscalls en lugar de las funciones que le otorga el lenguaje y nota que el proceso corre mucho más rápido, pero no funciona más en su otra PC. ¿Por qué pasa esto? ¿La cantidad de cambios de modo del nuevo código es mayor, menor o igual? Justifique",
+      "respuesta": "Al usar directamente syscalls el código es más “performante”, pero menos portable. A priori esperaríamos menos cambios de modo porque una buena parte del tiempo que se ahorra ahora viene de ahí."
+    },
+    {
+      "pregunta": "En un sistema monoprocesador se ejecutan varias instancias de un mismo proceso que comparten recursos. Al comienzo no se tomó ninguna medida, pero como la ejecución no era la esperada, se agregó una biblioteca que implementa la mutua exclusión usando soluciones de software. Sin embargo, el sistema comenzó a presentar otros problemas, por lo que se modificó la biblioteca para que utilice semáforos. Indique qué problemas se solucionaron y qué mejoras se produjeron con cada cambio.",
+      "respuesta": "Al comienzo, cuando no se protegían las secciones críticas existía el riesgo de que se produzca condición de carrera ocasionando resultados erróneos o poco confiables. Cuando se implementaron soluciones de software para resolver la mutua exclusión se logró que los resultados sean confiables, pero aumentó la tasa de uso de la CPU a causa de la espera activa. Al actualizar del uso de soluciones de software al uso de semáforos se logró evitar la espera activa mantenimiento los resultados confiables."
+    },
+    {
+      "pregunta": "Diseñe una configuración de colas multinivel (explicando transiciones y todo lo necesario) para el SO de un teléfono nuevo, sabiendo que se quieren priorizar las apps que el usuario tiene abiertas por sobre otras que corren en background, que las llamadas deben aparecer en primer plano siempre y que en el tiempo ocioso se correrán scripts para minar criptomonedas.",
+      "respuesta": "Esperamos tres colas: arriba una FIFO (para las llamadas), una intermedia para las apps que están corriendo activamente (podríamos pensar algún tipo de RR, por si hay varias abiertas al mismo tiempo) y otra de menor prioridad para minar y las otras apps (podría ser otro RR). Cada proceso entra y sale de su cola, pero al cerrar una app de la cola intermedia debería ir a la de baja prioridad."
+    },
+    {
+      "pregunta": "Indique específicamente si las afirmaciones son Verdaderas o Falsas y luego justifique. a. Los procesos creados por un mismo proceso padre comparten el heap con su padre. b. Un proceso con hilos ULT aprovecha mejor el quantum asignado por el SO que el mismo proceso utilizando hilos KLT.",
+      "respuesta": "a. Falso. Los procesos son independientes entre sí y cada uno tiene su propio heap. b. Falso. Los procesos ULT deben compartir el quantum porque este es asignado al proceso, en cambio a los KLT se les asigna el quantum que el SO. De todas maneras, algunas justificaciones verdaderas se podrían tomar como válidas, pensando en que los ULTs tienen menos overhead en los cambios de contexto."
+    },
+    {
+      "pregunta": "En la estrategia de evasión de deadlock mediante algoritmo del banquero. ¿Qué significa estado seguro? ¿Existe este concepto en la estrategia de detección de deadlock? Justifique.",
+      "respuesta": "El concepto de estado seguro hace referencia a que, dadas las matrices de peticiones máximas y de recursos asignados de un sistema, el algoritmo garantiza que no podrá producirse deadlock aún si en ese momento se peticionaran todos los recursos restantes posibles (matriz de necesidad). Este concepto no existe en el algoritmo de detección ya que el mismo no toma ninguna medida para que el deadlock no ocurra, sino que solamente lo detecta y luego intenta solucionarlo."
+    },
+    {
+      "pregunta": "Compare los algoritmos HRRN, SJF con desalojo y sin desalojo en términos de criterio de selección, posible desalojo, penalización procesos cortos/largos, Overhead, y Starvation",
+      "respuesta": "HRRN elige procesos cuyas próximas ráfagas sean cortas, pero ponderando también su espera en la cola de listos, para evitar la inanición. Ambos SJF apuntan a elegir al más corto, ya sea su ráfaga completa o bien su remanente. HRRN y SJF sin desalojo, no desalojan procesos en ejecución. El hecho de que HRRN calcule un response ratio para elegir procesos hace que sea el que mayor overhead presenta. Por otro lado, entre ambos SJF, la variante con desalojo produce mayor overhead porque compara a cualquier proceso que ingrese a la cola de listos con el que está en ejecución."
+    },
+    {
+      "pregunta": "Describa brevemente los tipos de semáforos y qué problema resuelve cada uno. ¿Cómo solucionaría un problema de productor/consumidor con un buffer infinito utilizando semáforos?",
+      "respuesta": "Tenemos tres tipos de semáforo: - Contadores: representan instancias de un recurso. Pueden tener cualquier valor, siempre y cuando sean números enteros. - Binarios: representan dos estados (cero o uno, libre u ocupado). Se utilizan para permitir o prohibir a un proceso avanzar. - Mutex: son un caso particular de los binarios. Se utilizan para garantizar mutua exclusión sobre un recurso o región crítica. Para un productor consumidor infinito necesitaríamos un semáforo mutex que proteja el buffer compartido y un semáforo contador que lleve un registro de la cantidad de mensajes en el buffer. De esa forma, un consumidor no intentará retirar un mensaje si no hay ninguno aún, y el productor lo incrementará ante cada nuevo mensaje."
+    },
+    {
+      "pregunta": "En un sistema que tiene modos de ejecución para garantizar la protección, indique. a. ¿Cómo sería la forma correcta de realizar una operación sobre el HW? b. Indique una forma “incorrecta” y explique por qué no sería permitida.",
+      "respuesta": "a. La forma correcta es realizarlo a través de una syscall, le “pedimos” al SO que realice la operación por nosotros, realizando el correspondiente cambio de modo b. La forma incorrecta sería intentar ejecutar la instrucción privilegiada en directamente. Esto fallaría ya que dicha instrucción sólo puede ser ejecutada en modo kernel."
+    },
+    {
+      "pregunta": "V o F, justifique en ambos casos: a. En una situación de deadlock una buena solución suele ser matar a todos los procesos involucrados. b. Utilizando el algoritmo de evasión podría llegar a ocurrir un deadlock si es que todos los procesos piden lo máximo que podrían pedir.",
+      "respuesta": "V o F a. F. Es una solución “barata” a nivel de no tener que determinar cuál es más conveniente pero no siempre soluciona el problema. Además, el impacto es muy alto ya que se pierde el avance de todos los procesos a diferencia de finalizar sólo uno o desalojar recursos. b. F. Justamente evasión asegura que siempre se esté en estado seguro, por lo que nunca podría ocurrir un deadlock. Al ser pesimista siempre considera ese caso (que todos pidan el máximo) a la hora de ver si le asigna o no un recurso a un proceso."
+    },
+    {
+      "pregunta": "Explique cómo el planificador de corto plazo podría llegar a generar una condición de carrera. Proponga una forma de solucionarla, sin soporte del SO, que pueda ser aplicado en entornos con múltiples procesadores",
+      "respuesta": "Puede ocurrir que estemos modificando una variable compartida entre dos procesos y que en medio de la operación (que a nivel instrucción se descompone en varias instrucciones) por causa de una interrupción el planificador decida ejecutar otro proceso. Esto da resultado la condición de carrera. Una forma de solucionarlo es sincronizando la región crítica con instrucciones atómicas como test_and_set, que pueden ser utilizadas en entornos multiprocesador."
+    },
+    {
+      "pregunta": "¿Cuál es la diferencia entre una Syscall y una función Wrapper? ¿En qué caso utilizaría cada una y por qué?",
+      "respuesta": "La syscall es el punto de entrada oficial y último para solicitar un servicio al sistema operativo. Ofrece máxima flexibilidad de uso y optimizaciones de performance, aunque carece de facilidad/claridad/portabilidad de uso. El wrapper (de una syscall) es una función que corre en modo usuario que se interpone entre la solicitud del servicio y la syscall real. Ofrece mayor facilidad/claridad/portabilidad en el uso, aunque restringe flexibilidad y la posibilidad de realizar optimizaciones de performance."
+    },
+    {
+      "pregunta": "¿En qué se diferencian las técnicas de prevención y los de detección de deadlock? ¿En qué casos utilizaría cada estrategia?",
+      "respuesta": "La estrategia de prevención evita el deadlock mediante el evitar que ocurra alguna de las cuatro condiciones necesarias y suficientes para que ocurre al deadlock, incurriendo en un grado de overhead bajo. Un ejemplo de uso podría ser una computadora de un avión, donde las consecuencias de la ocurrencia del deadlock podrían ser fatales. La estrategia de detección y recuperación no impide la ocurrencia del deadlock, sino que lo intenta resolver en caso de que el mismo ocurra, tomando un enfoque meramente reactivo y teniendo por lo tanto un grado de overhead mediano. Un ejemplo podría ser una base de datos transaccional, donde los deadlocks deberían resolverse pero es más importante la performance del sistema."
+    },
+    {
+      "pregunta": "Definir el concepto de sección crítica. ¿Qué condiciones debe cumplir? Mostrar un ejemplo del uso de soluciones hardware dentro de las primitivas wait/signal.",
+      "respuesta": "Región crítica es aquella porción del código donde se acceden o manipulan recursos compartidos con otros procesos/hilos, donde la no sincronización implicaría una condición de carrera entre todos los procesos/hilos que acceden a ese mismo recurso. Criterios para evaluar una solución al problema de la sección crítica: 1. Mutua Exclusión: Un sólo proceso/hilo a la vez. Para asegurarse que no hay condiciones de carrera, la sección crítica debe cumplir con las condiciones de Bernstein: a. Sean I las variables de entrada, O las variables de salida, y los índices “i,r” dos porciones de código, los mismos son independientes si: Iᵢ ∩ Oᵣ = ∅, Iᵣ ∩ Oᵢ = ∅, Oᵣ ∩ Oᵢ = ∅ 2. Progreso: Si está libre, un proceso/hilo debería poder acceder. Mientras que un proceso/hilo que está fuera de la misma, no debería impedir el ingreso. 3. Espera Limitada: Para ingresar el tiempo deber ser reducido, para evitar la inanición. Es una condición deseable. 4. Velocidad Relativa: El tiempo en que un proceso/hilo se encuentra dentro de la misma, deber ser finito, ya que corta la multiprogramación. Es una condición deseable. Ejemplo de las funciones wait() y signal() con deshabilitación de interrupciones: wait(){ deshabilitar_interrupciones(); semáforo --; if (semáforo < 0) bloquear_proceso(); habilitar_interrupciones(); } signal() { deshabilitar_interrupciones(); semáforo ++; if (semáforo <= 0) despertar_proceso(); habilitar_interrupciones(); }"
+    },
+    {
+      "pregunta": "Verdadero o falso: a. Utilizando semáforos en hilos ULT, no requieren realizar un cambio de modo para ejecutar las operaciones de wait/signal. b. Para compartir memoria entre procesos o entre KLTs se necesita intervención del SO. Entre ULTs no es necesario, debido a que se gestionan en espacio de usuario.",
+      "respuesta": "a. F: Requiere porque wait() y signal() son syscalls, y las mismas siempre se realizan con un cambio de modo. b. F: Los hilos, independientemente de que sean KLTs o ULTs comparten memoria (por ejemplo, variables globales) sin intervención del sistema operativo."
+    },
+    {
+      "pregunta": "Los algoritmos de planificación con desalojo ¿Qué eventos tienen en cuenta para la re-planificación? ¿Por qué los algoritmos sin desalojo no?",
+      "respuesta": "Los algoritmos con desalojo tienen en cuenta los mismos eventos de los algoritmos sin desalojo (bloqueo del proceso por syscall y finalización del mismo), y consideran también evento que derive en un ingreso a la cola de Ready (syscalls de creación de hilos/procesos, o interrupciones que indiquen fin de ráfaga o fin de I/O). Los algoritmos sin desalojo descartan estos últimos eventos porque deciden no expropiar la cpu al proceso una vez que la misma fue asignada."
+    },
+    {
+      "pregunta": "¿Es consciente en algún momento el proceso del hecho de quedar bloqueado o continuar su ejecución? En caso afirmativo explique cómo, y en caso negativo indique por qué.",
+      "respuesta": "El proceso no es consciente de que se bloquea o que continua su ejecución. Esto se debe a que dichos eventos son realizados por el sistema operativo, guardando y restaurando el contexto de ejecución de forma transparente al proceso."
+    },
+    {
+      "pregunta": "Indique las dos formas para prevenir el deadlock utilizando las siguientes condiciones: a. Retención y Espera. b. Sin Desalojo.",
+      "respuesta": "a. Retención y espera: el proceso debe solicitar todos los recursos que va a utilizar de forma simultánea, y si alguno de los mismos no está disponible, la totalidad de la solicitud es denegada. b. Sin desalojo: el sistema operativo debe poder ex-propiar los recursos que el proceso tenga asignados, para lo cual los mismos deben poder ser retrotraidos a un estado previo consistente, y los procesos deben disponer de un mecanismo para ser notificados que les fué des-asignado un recurso."
+    },
+    {
+      "pregunta": "¿Qué problema resuelve un semáforo mutex? ¿De qué otra forma podría resolver el mismo problema? Si en cierto momento el valor de dicho semáforo es negativo, ¿qué implicancias puede asumir?",
+      "respuesta": "Los semáforos mutex resuelven el problema de condición de carrera, es decir, que el resultado de la ejecución sea distinta según el orden de ejecución por estar accediendo en forma concurrente (al menos uno en modo escritura) a un recurso compartido. Esto se puede lograr también con instrucciones atómicas como testAndSet o swapAndExchange. Si un semáforo tiene un valor negativo puedo darme cuenta que el wait está implementado con bloqueo, y que hay al menos un proceso bloqueado en la cola de espera de dicho mutex."
+    },
+    {
+      "pregunta": "V o F a. Los semáforos, aún bien usados, pueden llegar a generar problemas en sistemas que utilicen planificadores de corto plazo basados en prioridades. b. Tanto el uso de prevención como de detección y recuperación de deadlocks podría llegar a generar starvation.",
+      "respuesta": "a. Verdadero. Un ejemplo de esto es la inversión de prioridades, en el que un proceso de mayor prioridad no puede ejecutar por estar esperando un recurso retenido por uno de menor prioridad b. Verdadero. En el caso de la recuperación, si siempre se elige al mismo proceso para ser finalizado o desalojado, podría ocurrir que nunca termine su ejecución. En el caso de prevención, podría ocurrir lo mismo, que cuando se bloquee esperando un recurso venga otro que necesite alguno de los que retiene y sea desalojado reiteradas veces."
+    },
+    {
+      "pregunta": "Describa cómo afecta en el comportamiento de un sistema el tamaño del quantum. ¿Afecta de la misma manera en RR que en VRR?",
+      "respuesta": "A mayor quantum el algoritmo RR degenera en FIFO. A menor quantum se vuelve más equitativo pero con mayor overhead. En el algoritmo VRR afectaría de forma similar, con el agregado de tener una cola auxiliar potencialmente grande con un quantum chico, y una degeneración al algoritmo RR común con un quantum grande."
+    },
+    {
+      "pregunta": "¿Quiénes pueden crear o finalizar Procesos en un sistema? ¿Cómo lo hacen? ¿Qué le sucede al proceso hijo si su padre finaliza inesperadamente?",
+      "respuesta": "Un proceso puede ser creado/finalizado por el sistema operativo o por otro proceso. En caso de ser realizado por otro proceso, la operación se realiza a través de una llamada al sistema. Si el proceso padre finaliza inesperadamente,| los procesos hijos pueden seguir ejecutando dado que son entidades autosuficientes (aún si son adoptados por otro proceso como su nuevo padre)"
+    },
+    {
+      "pregunta": "Describa las condiciones necesarias y suficientes para la existencia de un Deadlock. Indique las desventajas que tiene la estrategia de detección y recupero de Deadlock.",
+      "respuesta": "- Mutua exclusión obligatoria - No expropiación de recursos - Retención y espera - Espera circular Las desventajas de una estrategia de recupero son que no pueden aplicarse en sistemas donde el deadlock no puede permitirse bajo ninguna circunstancia, y también el hecho de que al recuperarse del deadlock quitando un recurso o finalizando un proceso implica un impacto negativo para dicha víctima."
+    },
+    {
+      "pregunta": "V o F a. El hecho de utilizar un semáforo implica un cambio de modo de ejecución. b. El planificador de corto plazo según sus decisiones modifica el grado de multiprogramación del sistema.",
+      "respuesta": "a. Verdadero. Para manipular los semáforos utilizamos syscalls provistas por el SO, por lo que es necesario cambiar a modo kernel. b. Falso. Los planificadores que modifican el grado de multiprogramación son los de mediano y largo plazo, ya que son los que pueden decidir cargar o sacar un proceso de memoria - disco."
+    },
+    {
+      "pregunta": "Describa brevemente qué ocurre cuando se invoca una syscall desde un proceso en modo usuario y cómo se atiende la misma.",
+      "respuesta": "a. Genera la interrupción de sw. b. Cambio a modo kernel + cambio de la base del stack por la del stack del kernel. c. Identificar en la syscall table qué rutina utilizar para atender la misma. d. Ejecutar la rutina. e. Mover el resultado de la syscall al stack del programa."
+    },
+    {
+      "pregunta": "Explique por qué las llamadas al sistema deben realizar un cambio a modo kernel. Indique qué sucedería si la misma llamada se mantuviera en modo usuario durante toda su ejecución.",
+      "respuesta": "Porque utilizan instrucciones que requieren que el bit de modo esté seteado en modo kernel, ya que acceden a hardware o bien a secciones de memoria que un proceso no puede (ni debe) acceder en modo usuario. Si la misma se mantuviera en modo usuario, se producirá un error (en forma de interrupción) a la hora de ejecutar alguna instrucción privilegiada"
+    },
+    {
+      "pregunta": "Explique por qué un proceso suspendido no siempre está a la espera de un evento.",
+      "respuesta": "Puede estar suspendido listo, lo cual significa que estuvo esperando un evento y mientras eso ocurría fue suspendido. Luego dicho evento se produjo, y por lo tanto el proceso quedó en estado suspendido/listo."
+    },
+    {
+      "pregunta": "Un Sistema Operativo bancario corre algunos grupos de procesos. A primera hora de la mañana, se corren procesos financieros que deben finalizar lo antes posible, ya que de sus resultados depende la compra de acciones y bonos durante el dia. Durante toda la jornada, se corren procesos que atienden “virtualmente” a los clientes, realizando pequeñas entradas-salidas ante cada pregunta que reciben. Explique qué algoritmo de planificación utilizaría, indicando configuración de colas, transiciones y al menos dos criterios para evaluar su funcionamiento.",
+      "respuesta": "En principio alguna variante de colas multinivel. Idealmente, los procesos financieros deben estar en una cola de mayor prioridad, y las atenciones virtuales en una cola de menor. La primera cola probablemente utilice un FIFO, la segunda podría usar RR, para poder distribuir la atención de los clientes. No hay transiciones entre las colas, ya que la idea es separarlos. Dos criterios que podrían usarse para evaluar el funcionamiento son: Deadlines (sobre todo para la cola de mayor prioridad) y quizás tasa de procesamiento (para todos, cuantas más consultas se contesten, mejor será el algoritmo)."
+    },
+    {
+      "pregunta": "Explique cómo funcionan los semáforos bloqueantes, indicando ventajas y desventajas. Explique cómo implementa el Sistema Operativo la mutua exclusión sobre la “variable semáforo”.",
+      "respuesta": "El semáforo bloqueante decrementa la variable semáforo con wait, y si el valor es < a cero bloquea al proceso. Lleva una cola de procesos bloqueados. La función signal la incrementa, y si corresponde, desbloquea un proceso de la cola. El sistema operativo puede implementar mutua exclusión, sobre el semáforo en sí, deshabilitando las interrupciones o bien con instrucciones de hw (por ej, test and set)"
+    },
+    {
+      "pregunta": "Describa brevemente la estrategia de detección y recupero de deadlock (no es necesario describir el algoritmo de detección en sí mismo). Mencione al menos dos desventajas de aplicar dicha estrategia.",
+      "respuesta": "La estrategia consiste en no otorgar límite alguno en el inicio y solicitud de recursos de parte de los procesos. Agregado a eso, se ejecuta periódicamente un algoritmo de detección de deadlock sobre el estado actual, y en caso de encontrar alguno se intenta eliminar el mismo a través de alguna estrategia de recupero (finalización de proceso, expropiación de recurso, etc). Desventajas podrían ser el overhead que genera correr el algoritmo cada cierto periodo de tiempo, y también el hecho de que los procesos podrían verse finalizados abruptamente si fueron parte de un deadlock."
+    },
+    {
+      "pregunta": "Defina brevemente llamada al sistema (syscall). ¿Qué relación tiene con los modos de ejecución y las instrucciones privilegiadas?",
+      "respuesta": "Herramienta utilizada por los procesos para solicitar servicios al sistema operativo que de otra forma le serían imposibles poder realizar, como el uso de recursos de hardware (leer disco por ejemplo) o de otra índole (crear un klt por ejemplo). Los procesos ejecutan en modo usuario, bajo el cual no se pueden ejecutar instrucciones privilegiadas. Al realizar una llamada al sistema, se cambia a modo kernel, y solamente en dicho modo se pueden ejecutar instrucciones privilegiadas."
+    },
+    {
+      "pregunta": "¿En qué situaciones convendría usar hilos de usuario en lugar de hilos de kernel? Mencione al menos dos atributos propios del TCB (Thread Control Block)",
+      "respuesta": "Convendría usar ULT por sobre KLT cuando se requiera overhead al mínimo (debido a que no hay cambios de modo), o se requiera portabilidad del programa (dado que sobre bibliotecas estándares podria usarse en cualquier SO), o se requiera una planificación particular no provista por el sistema operativo. Dos atributos pueden ser el TID (thread id) y el contexto de ejecución (PC, flags, etc)"
+    },
+    {
+      "pregunta": "Explique las implicancias de utilizar un planificador de corto plazo sin desalojo (non preemptive) en sistemas operativos de tiempo compartido (o multitarea).",
+      "respuesta": "El sistema operativo solo puede recuperar el control de la CPU cuando el proceso finaliza o se bloquea, por lo que un usuario/proceso podría nunca ejecutar si otro proceso nunca libera el procesador, ya sea por un error o porque deliberadamente no se bloquea nunca."
+    },
+    {
+      "pregunta": "Explique cómo funcionan los semáforos con espera activa, indicando ventajas y desventajas.",
+      "respuesta": "Los mismos garantizan la mutua exclusión a través de alguna solución de software (algoritmo de peterson por ejemplo) o usando la instrucción de hardware (como test_and_set). Tienen la ventaja de sirven para sistemas multiprocesador sin generar overhead extra (como sí lo haría el deshabilitar las interrupciones). Tienen la desventaja de generar una pequeña carga de espera activa."
+    },
+    {
+      "pregunta": "En la estrategia de evasión de Deadlock mediante algoritmo del banquero, ¿Que significa estado seguro? ¿Podría el sistema quedar en estado inseguro ante alguna situación particular?",
+      "respuesta": "Estado seguro significa que se tiene la certeza de que nunca ocurrirá un deadlock y que existe al menos una secuencia segura de finalización de los procesos. El sistema nunca podría quedar en estado inseguro, debido a que la estrategia consiste en no otorgar recursos que pudieran dejarlo en dicha situación."
+    },
+    {
+      "pregunta": "Mencione todos los pasos que ocurren cuando al estar ejecutando un proceso se produce una interrupción de e/s finalizada (correspondiente a otro proceso que se encontraba bloqueado).",
+      "respuesta": "- Se produce la interrupción, frenando la ejecución del proceso actual - Al finalizar la instrucción actual se chequea si hay interrupciones pendientes - Se guarda el contexto de ejecución del proceso actual en la pila del sistema operativo - Se produce un cambio de modo usuario a modo kernel - Se pasa el control al gestor de interrupciones del sistema operativo - El sistema operativo pasa el proceso bloqueado a la lista de listos - Suponiendo que el planificador de corto plazo no implica desalojo: - Se cambia el modo de ejecución de kernel a usuario - Se restaura el contexto de ejecución del proceso original de la pila del sistema"
+    },
+    {
+      "pregunta": "V o F a. La utilización de KLTs en lugar de procesos, a pesar de ser más rápido su switcheo, puede generar problemas de memory leaks b. En el caso de utilizar jacketing en la biblioteca de ULTs, es lo mismo usar hilos a nivel de usuario que a nivel de kernel",
+      "respuesta": "a. Verdadero. Los KLTs de un mismo proceso comparten recursos, por lo tanto, recién cuando finalice el proceso se liberarán los mismos. Entonces, si un usuario no libera correctamente la memoria que pide dinámicamente en sus KLTs, podrán existir problemas de secciones alocadas no referenciadas hasta que el proceso finalice y se liberen. b. Falso. El jacketing salva la situación de que un ULT bloqueado bloquee a otro ULT del mismo KLT/proceso asociado. Sin embargo, para el SO sigue siendo una única unidad de planificación, por lo que no se podría aprovechar el multiprocesamiento en caso de tener más de un procesador."
+    },
+    {
+      "pregunta": "Proporcione ejemplos para las siguientes transiciones entre estados: Running -> Ready, Suspended/Ready -> Ready, Ready -> Exit, Ready -> Blocked.",
+      "respuesta": "Running -> Ready: cuando el proceso es desalojado del procesador, por ejemplo al finalizar el quantum en RR Suspended/Ready -> Ready: Cuando el nivel de multiprogramación disminuye y el planificador de mediano plazo decide llevar al proceso a memoria Ready -> Exit: cuando se decide finalizar el proceso y el mismo no estaba ejecutando Ready -> Blocked: esta transición no es posible"
+    },
+    {
+      "pregunta": "Explique en detalle la estrategia de prevención del interbloqueo.",
+      "respuesta": "La estrategia de prevención del interbloqueo consiste a grandes rasgos en diseñar un sistema de manera que esté excluida la posibilidad de interbloqueo, existen dos métodos: *Indirectos: Impiden la aparición de las tres condiciones antes mencionadas. *Directos: Evitan la aparición del círculo vicioso de espera"
+    },
+    {
+      "pregunta": "¿En qué consiste el ciclo de ejecución de una instrucción? ¿Podría una interrupción surgir como consecuencia de dicho ciclo? (en caso afirmativo brinde un ejemplo)",
+      "respuesta": "Consiste en las etapas de fetch (traer instrucción), decode (decodificar la instrucción) y execute (ejecutar la instrucción). Al final se realiza un chequeo de la existencia de interrupciones, y en caso de que exista alguna se llama al sistema operativo. Sí, podría ocurrir. Por ejemplo, al ejecutar una instrucción de división por cero."
+    },
+    {
+      "pregunta": "¿Qué comparten un proceso padre y un proceso hijo? ¿Y en el caso de dos hilos del mismo proceso?",
+      "respuesta": "Un proceso padre y el proceso hijo no comparten nada. El proceso hijo conoce el identificador del proceso padre (PPID) como única referencia. Entre hilos si comparten distinta informacion: PCB, codigo, datos (variables globales), archivos abiertos, etc"
+    },
+    {
+      "pregunta": "Mencione los requisitos mínimos y deseables para la correcta aplicación de la mutua exclusión. Indique al menos dos ventajas del uso de semáforos por sobre soluciones de software",
+      "respuesta": "- Mutua exclusión obligatoria - Tiempo de espera finito (no starvation) - Tiempo de espera reducido - Ingreso inmediato a región crítica si la misma está libre - No interferencia de un proceso hacia otros si el mismo no está en ninguna región crítica"
+    },
+    {
+      "pregunta": "Explique las condiciones necesarias y suficientes para que ocurra interbloqueo.",
+      "respuesta": "1. Exclusión Mutua: sólo un proceso puede usar un recurso cada vez. 2. Retención y Espera: un proceso puede retener unos recursos asignados mientras espera que se le asignen otros 3. No Expropiación: ningún proceso puede ser forzado a abandonar un recurso que retenga 4. Espera Circular: Cadena cerrada de procesos, retiene al menos un recurso que necesita el siguiente proceso de la cadena."
+    },
+    {
+      "pregunta": "¿Qué diferencias existen entre los algoritmos de planificación de procesos con y sin desalojo? Indique brevemente en qué sistemas sugeriría utilizar cada uno.",
+      "respuesta": "1. Los algoritmos sin desalojo sólo re-planifican cuando se libera la CPU, es decir, cuando los procesos la abandonan voluntariamente (finalizan o se bloquean). Los algoritmos con desalojo consideran además otros eventos, esto es, por ejemplo, cuando hay un proceso nuevo en la cola de listos (desde nuevo o bloqueado) o si es que se implementa un quantum. Sin desalojo se podría usar en un sistema que no sea crítico (no tenga procesos de tiempo real que tengan que ejecutar sí o sí), en los que se quiera minimizar el overhead por process switches extras."
+    },
+    {
+      "pregunta": "V o F: a. Si se estaba ejecutando una syscall y ocurre una interrupción se esperará a que finalice su ejecución para atenderla, por ser código del SO. b. Una de las mayores desventajas de los microkernels es su problema de performance.",
+      "respuesta": "V o F: a .Falso. Luego de cada ciclo de instrucción se valida si es que hay interrupciones por lo que se atenderá al finalizar de ejecutar la instrucción en curso. Luego de atender la interrupción seguirá con la syscall. b. Verdadero. La comunicación entre distintos módulos del SO ahora tiene que realizarse a través de paso de mensajes pasando por el kernel, lo cual genera un overhead extra."
+    },
+    {
+      "pregunta": "Indique todas las operaciones que habría que realizar y estructuras administrativas que habría que modificar a la hora de crear un archivo y un hardlink del mismo (UFS). ¿Qué otras estructuras se modificarían si un proceso abriese dicho archivo en modo lectura?",
+      "respuesta": "Debería asignar un inodo, modificando el bitmap de inodos. Asignar los bloques necesarios, modificando el bitmap de bloques. También se modificará el inodo con la información del inodo. Se creará la entrada de directorio apuntando a dicho inodo. Se actualizará también el superbloque. Al crear el hardlink se modifica el inodo y se agrega una entrada en el directorio donde es creado. Si se abre un archivo se lo buscará en la tabla de archivos abiertos, si el mismo no se encuentra abierto se cargará el FCB en memoria sino, se incrementará en un el contador de aperturas de dicho archivo. Luego se creará una entrada en la tabla de archivos abiertos del proceso apuntando a la entrada global e indicando el modo de acceso."
+    },
+    {
+      "pregunta": "Explique por qué los semáforos cumplen con las condiciones para ser una buena solución a la sección crítica. ¿Cómo podría lograr el SO que sus syscalls wait y signal sean atómicas?",
+      "respuesta": "Cumple con mutua exclusión ya que sólo un proceso podrá adquirir el semáforo a la vez, el resto se quedarán bloqueados. Cumple progreso ya que los únicos que pueden afectar que un proceso pueda adquirir el semáforo son los que también están realizando el wait. Cumple con espera limitada ya que los procesos se bloquearán en una cola de dicho semáforo y luego se irán despertando a medida que se haga signal respetando el orden de bloqueo. No depende de la velocidad de los procesos. Los wait y signal operan sobre los semáforos que son compartidos, por lo que también tienen una región crítica. Para que sea atómica el SO podría usar una técnica de HW como por ejemplo testAndSet."
+    },
+    {
+      "pregunta": "Explique las operaciones asociadas con el cambio de ejecución de un KLT a otro del mismo proceso.",
+      "respuesta": "- Se guarda una parte inicial del contexto (PC, FLAGS) en el stack del sistema. - El SO ingresa su ejecución y guarda el resto de los registros en el stack del sistema. - El SO determina que debe realizar un thread switch. - Mueve el contexto de ejecución completo del stack del sistema al TCB del hilo. - Elige el próximo hilo a ejecutar. - Copia todo el contexto del TCB del nuevo hilo al procesador y realiza un cambio de modo (a usuario), todo al mismo tiempo. - Aclaración: No se actualizan registros relacionados con punteros a segmentos de memoria estáticos, heap o código, dado que pertenecen al proceso y son compartidos por todos los hilos."
+    },
+    {
+      "pregunta": "¿A qué se refiere el problema de starvation en planificación de procesos? Mencione dos algoritmos con desalojo que puedan sufrir del mismo e indique en cada caso cómo se podría solucionar.",
+      "respuesta": "Un proceso nunca es seleccionado para ejecutar en el procesador debido a la constante llegada a Ready de procesos de mayor prioridad. Algoritmos que podrían sufrir inanición: - Por prioridades fijas: se puede solucionar utilizando aging, aumentando con el tiempo la prioridad hasta que un proceso se pueda ejecutar (transformándolo en prioridades dinámicas). - SJF: no puede solucionarse a menos que se modifique el algoritmo (por ejemplo, teniendo en cuenta la variante tiempo de espera, convirtiéndose en HRRN) - Feedback multinivel: se puede subir de cola a los procesos, considerando el tiempo de espera"
+    },
+    {
+      "pregunta": "V o F a. Los wrappers de las syscalls permiten que se realice el cambio de modo de user a kernel b. Nunca puede ocurrir un cambio de contexto sin realizar cambio de proceso.",
+      "respuesta": "V o F 1. Falso. La syscall se encarga de realizar el cambio de modo. Los wrappers permiten abstraer de detalles de bajo nivel de las syscalls y ganar portabilidad. 2. Falso. Se podría estar ejecutando una syscall y que llegue una interrupción que haya que atender, se cambiaría el contexto del procesador pero no necesariamente se cambiaría el proceso (por ejemplo en planificación sin desalojo)."
+    },
+    {
+      "pregunta": "¿Sería eficiente el intentar detectar un bug ocasionado por una condición de carrera debugueando el programa?",
+      "respuesta": "No sería correcto, porque los bugs ocasionados por problemas de condiciones de carrera dependen de la velocidad relativa de ejecución de dos programas, y esta es explícitamente modificada mientras se debuguea (debido a que se frena la ejecución de alguno de ellos de forma temporal) pudiendo generar condiciones bajo las cuales nunca ocurriría el problema."
+    },
+    {
+      "pregunta": "Explique ventajas y desventajas del uso de ULTs en lugar de KLTs",
+      "respuesta": "Los ults ofrecen portabilidad, planificación a medida y menor overhead que los KLT. En contrapartida, los mismos no permiten paralelismo (ULTs del mismo proceso) y al bloquearse uno, se bloquean todos los del mismo KLT (excepto que se esté utilizando Jacketing)."
+    },
+    {
+      "pregunta": "Explique brevemente las distintas formas de administración de bloques libres en un filesystem.",
+      "respuesta": "Se puede administrar mediante: - Una lista de bloques libres - Tener los bloques libres enlazados - Un bitmap de bloques libres"
+    }
+  ]
+}
