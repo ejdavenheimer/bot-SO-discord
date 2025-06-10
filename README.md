@@ -8,7 +8,7 @@ Botcito para Discord para estudiar Sistemas Operativos.
 !p (muestra la primera pregunta)  
 !r (permite responder después del espacio)  
 !siguiente (muestra la siguiente pregunta)  
-!clasificacion (muestra la clasificación de los usuarios que respondieron)  
+!tantos (muestra la clasificación de los usuarios que respondieron)  
 !reiniciar (reinicia las preguntas)  
 
 # Preguntas del primer parcial
